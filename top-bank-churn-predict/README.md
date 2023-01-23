@@ -1,6 +1,8 @@
 <h1><p align= "center"><b>Data Science Project - Top Bank Churn Predict</b></p></h1>
 
-[![Top Back Churn Predict](img/Top%20Bank%20logo.png)](https://www.kaggle.com/datasets/adammaus/predicting-churn-for-bank-customers)
+<p align= "center">
+<a href="https://www.kaggle.com/datasets/adammaus/predicting-churn-for-bank-customers"><img src= "img/Top%20Bank%20logo.png" alt= "top bank churn predict logo"></a>
+</p>
 
 > Status: Desenvolvimento por versões. Em progresso ⚠️
 
