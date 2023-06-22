@@ -31,9 +31,9 @@ Através da descrição dos dados, pude perceber que não existe variável tempo
 
 **1.** Qual ponto no tempo a extração de dados foi feita? Qual é a relevância desse período?
 	
-	R: Sem suposições no momento.
+	R: Vou considerar que extração dos dados foi feita no período de 1 ano.
 
-**2.** Se os dados foi extraído como o resumo de 1 ano, o valor de saldo representa o valor presente na conta(s) no momento da extração, o somátorio de saldo presente na(s) conta(s) durante 1 ano ou o valor máximo do saldo presente nesse período.
+**2.** Se os dados foi extraído como o resumo de 1 ano, o valor de 'saldo' representa o valor presente na conta(s) no momento da extração, o somátorio de saldo presente na(s) conta(s) durante 1 ano ou o valor máximo do saldo presente nesse período.
 	
 	R: Sem suposições no momento. 
 
@@ -41,9 +41,9 @@ Através da descrição dos dados, pude perceber que não existe variável tempo
 
 	R: Vamos trabalhar com a idéia de que a variável 'Churn' representa a vontade de rotatividade do cliente no próximo ano.
 
-4. O que seria de fato 'membro_ativo', clientes que fizeram transações em todos os meses do ano, ou pelo menos uma vez durante o período de extração?
+**4.** O que seria de fato 'membro_ativo', clientes que fizeram transações em todos os meses do ano, ou pelo menos uma vez durante o período de extração?
 
-	R: Sem suposições no momento.
+	R: Vou considerar positivo para 'membro_ativo' clientes que realizaram transações em todos os meses.
 
 Pra esse projeto, irei modelar sem a resposta dessas questões, embora, ter o contexto melhora o entendimento do problema e possivelmente melhores resultados na modelagem dos dados.
 
@@ -88,10 +88,10 @@ Meus passos estratégicos para desenvolver a solução do Problema.
 		R: Clientes que irão dar Churn correspondem a 20.37% da base de dados e clientes que não irão dar Churn correspondem a 79.63% da base de dados.
 	**2.** Qual é o desempenho do modelo na classificação de clientes como churns?
     	
-		R: O modelo possui uma acurácia real de 90% para indentificar churns neste primeiro ciclo.
+		R: O modelo possui uma acurácia real de 86% para indentificar churns neste primeiro ciclo.
 	**3.** Qual é o retorno esperado, em termos de receita, se a empresa utilizar seu modelo para evitar o churn de clientes?
     	
-		R: Se a empresa usar o modelo desenvolvido com um recall de 55.99% para clientes com rotatividade positiva, a receita média anual será de US$909.940.072,79
+		R: Se a empresa usar o modelo desenvolvido com um recall de 55.68% (métrica extraída a partir de dados de teste) para clientes com rotatividade positiva, a receita média anual será de US$909.292.147,24 
         
 <hr> 
 <div style= "margin: 15px;"></div>
@@ -106,7 +106,7 @@ Meus passos estratégicos para desenvolver a solução do Problema.
 		R: O modelo possui uma acurácia real de 90% para indentificar churns no segundo ciclo.
 	**3.** Qual é o retorno esperado, em termos de receita, se a empresa utilizar seu modelo para evitar o churn de clientes?
     	
-		R: Se a empresa usar o modelo desenvolvido com um recall de 57.85% para clientes com rotatividade positiva, a receita média anual será de US$913.784.424,68
+		R: Se a empresa usar o modelo desenvolvido com um recall de 57.85% (métrica extraída a partir de dados de teste) para clientes com rotatividade positiva, a receita média anual será de US$913.784.424,68
 <hr> 
 <div style= "margin: 15px;"></div>
 
