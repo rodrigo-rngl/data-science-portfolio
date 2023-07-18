@@ -56,25 +56,23 @@ Meus passos estratégicos para desenvolver a solução do Problema.
 
 2) **Problem Understanding and Solution Planning**
 
-3) **Creation of New Variables**
+3) **Exploratory Data Analysis**
 
-4) **Exploratory Data Analysis**
+4) **Feature Engineering**
 
-5) **Feature Engineering**
+5) **Feature Selection**
 
-6) **Feature Selection**
+6) **Machine Lerning and Model Metrics**
 
-7) **Machine Lerning and Model Metrics**
-
-8) **Business Translation**
+7) **Business Translation**
 
 <hr> 
 <div style= "margin: 15px;"></div>
 
 # 4 - Machine Learning e Métricas
 
-- No primeiro ciclo, foi criado um modelo **Random Forest Classifier com 86% de precisão real**;
-- No segundo ciclo, foi criado um modelo **XGBoost com 90% de precisão real**;
+- No primeiro ciclo, foi criado um modelo **Random Forest com 86% de acurácia**;
+- No segundo ciclo, foi criado um modelo **XGBoost com 96% de acurácia**;
 
 <hr> 
 <div style= "margin: 15px;"></div>
@@ -88,10 +86,12 @@ Meus passos estratégicos para desenvolver a solução do Problema.
 		R: Clientes que irão dar Churn correspondem a 20.37% da base de dados e clientes que não irão dar Churn correspondem a 79.63% da base de dados.
 	**2.** Qual é o desempenho do modelo na classificação de clientes como churns?
     	
-		R: O modelo possui uma acurácia real de 86% para indentificar churns neste primeiro ciclo.
+		R: O modelo possui uma performance real de 86% para indentificar churns neste primeiro ciclo.
 	**3.** Qual é o retorno esperado, em termos de receita, se a empresa utilizar seu modelo para evitar o churn de clientes?
     	
-		R: Se a empresa usar o modelo desenvolvido com um recall de 55.68% (métrica extraída a partir de dados de teste) para clientes com rotatividade positiva, a receita média anual será de US$909.292.147,24 
+		R: Se a empresa usar o modelo desenvolvido com um recall de 55.05% (métrica extraída a partir de dados de teste) para clientes com rotatividade positiva, a receita média anual aproximada será de US$908.006.389,32 
+
+		Obs.: Considerando que a empresa vá converter todos os clientes que foram identificados.
         
 <hr> 
 <div style= "margin: 15px;"></div>
@@ -103,21 +103,24 @@ Meus passos estratégicos para desenvolver a solução do Problema.
 		R: Clientes que irão dar Churn correspondem a 20.37% da base de dados e clientes que não irão dar Churn correspondem a 79.63% da base de dados.
 	**2.** Qual é o desempenho do modelo na classificação de clientes como churns?
     	
-		R: O modelo possui uma acurácia real de 90% para indentificar churns no segundo ciclo.
+		R: R: O modelo escolhido (XGBoost) possui uma performance real de 96% nesse segundo ciclo.
 	**3.** Qual é o retorno esperado, em termos de receita, se a empresa utilizar seu modelo para evitar o churn de clientes?
     	
-		R: Se a empresa usar o modelo desenvolvido com um recall de 57.85% (métrica extraída a partir de dados de teste) para clientes com rotatividade positiva, a receita média anual será de US$913.784.424,68
+		R: Se a empresa usar o modelo desenvolvido com um recall de 72.14% para clientes com rotatividade positiva, a receita média anual aproximada será de US$943.316.806,57
+
+		Obs.: Considerando que a empresa vá converter todos os clientes que foram identificados.
 <hr> 
 <div style= "margin: 15px;"></div>
 
 # 7 - Lessons Learned
 
-- Dividir os dados sempre antes de normalizar.
 - Conhecer os dados melhora o planejamento da solução.
+- O balanceamento dos dados aumenta consideravelmente a chance de overfitting.
+- Não tenha medo de experimentar, afinal, é **Ciência** de Dados!
 
 <hr> 
 <div style= "margin: 15px;"></div>
 
-<center>Para acessar as versões do projeto, acesse a pasta *notebooks*.</center>
+<center>Para acessar as versões do projeto, acesse a pasta <b>notebooks</b>.</center>
 <center>Obrigado!</center>
 <center>Rodrigo Rangel</center>
