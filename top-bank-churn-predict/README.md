@@ -114,8 +114,8 @@ Meus passos estratégicos para desenvolver a solução do Problema.
 
 # 7 - Lessons Learned
 
-- Conhecer os dados melhora o planejamento da solução.
-- O balanceamento dos dados aumenta consideravelmente a chance de overfitting.
+- Conhecer os dados é primordial para o planejamento da solução.
+- O balanceamento dos dados pode aumentar consideravelmente a chance de overfitting.
 - Não tenha medo de experimentar, afinal, é **Ciência** de Dados!
 
 <hr> 
