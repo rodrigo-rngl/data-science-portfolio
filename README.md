@@ -4,6 +4,8 @@
 
 <p align= "center">O principal objetivo deste portfólio de projetos de dados é <u>demonstrar minhas habilidades na resolução de desafios e projetos de <b>Ciência de Dados</b> e <b>Engenharia de Machine Learning</b></u></p>
 
+> **Status**: *Em progresso* ⚠️
+
 <h2 style= "padding-top: 20px;" > Rodrigo Rangel</h2>
 
 <sub>*IT Manager | Data Scientist*</sub>
@@ -16,14 +18,10 @@ Neste portfólio vou procurar modelar 3 problemas frequentes na área de Ciênci
 
 ## Projetos
 
-### [House Price Prediction]() (Regressão)
+### [House Price Prediction](https://github.com/rodrigo-rngl/data-science-portfolio/tree/master/projects/house-prices-prediction) (Regressão)
 
 - **Predição de preços de casas**
 
 Este projeto foi desenvolvido com o objetivo de demonstrar habilidades em modelos de regressão supervisionada, aplicando técnicas avançadas para prever preços de residências no concurso Kaggle, usando dados da cidade de Ames, Iowa. O trabalho incluiu etapas de manipulação de dados, análise exploratória, seleção de features e modelagem preditiva, com foco na integridade dos dados e na prevenção de vazamento de informações. O modelo final, um XGBoost, alcançou uma performance robusta, destacando a importância de visualizações personalizadas e testes estatísticos para uma boa análise de dados, e pipelines estruturados para obter resultados precisos.
 
 <div style= "margin: 40px;"></div>
-
-### [Top Bank Churn Prediction]() (Classificação)
-
-- **Predição da rotatividade de uma empresa bancária (dados desbalanceados)**

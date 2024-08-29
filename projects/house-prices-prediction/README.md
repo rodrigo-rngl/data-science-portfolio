@@ -49,9 +49,8 @@ Após a, o *RMSLE* atingiu o valor de **0.15681**, aproximando muito do desempen
 
 - **A fidelidade na validação é um reflexo direto da performance real**. Uma validação bem conduzida com dados não vazados oferece uma visão clara do desempenho futuro da solução, permitindo ajustes precisos antes da submissão final.
 
- 
+<hr></hr>
 <div style= "margin: 20px;"></div>
 
-<center>Para acessar as versões do projeto, acesse a pasta <u>notebooks</u>.</center>
-<center>Obrigado!</center>
-<center>Rodrigo Rangel</center>
+<p align= "center">Para acessar as versões do projeto, acesse a pasta <a href= "https://github.com/rodrigo-rngl/data-science-portfolio/tree/master/projects/house-prices-prediction/notebooks">notebooks</a>.</p>
+<p align= "center">Obrigado!</p>
