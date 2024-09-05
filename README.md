@@ -12,15 +12,15 @@
 
 Cientista de Dados em formação, apaixonado pelo desenvolvimento de modelos supervisionados e pela Ciência de Dados. A cada dia, busco aperfeiçoar minhas habilidades por meio de projetos práticos, com o objetivo de me tornar um Engenheiro de Machine Learning. Estou comprometido em aplicar modelos avançados para elevar a performance e a otimização dos processos empresariais, sempre aliando expertise técnica com uma visão estratégica de negócios.
 
-Neste portfólio vou procurar modelar 3 problemas frequentes na área de Ciência de Dados (**problemas de regressão, classificação e clusterização**), passando por todas as etapas de desenvolvimento de uma solução/aplicação, como: <u>técnicas de planejamento de solução, análise exploratória de dados, engenharia de recursos , modelagem preditiva, e deploys sistemas específicos utilizando computação em nuvem.</u>
+Neste primeiro momento vou procurar modelar 3 problemas frequentes na área de Ciência de Dados (**problemas de regressão, classificação e clusterização**), passando por todas as etapas de desenvolvimento de uma solução/aplicação, como: <u>técnicas de planejamento de solução, análise exploratória de dados, engenharia de recursos, modelagem preditiva, e deploys sistemas específicos utilizando computação em nuvem.</u>
 
 <div style= "margin: 20px;"></div>
 
 ## Projetos
 
-### [House Price Prediction](https://github.com/rodrigo-rngl/data-science-portfolio/tree/master/projects/house-prices-prediction) (Regressão)
+### [House Sales Price Forecast](https://github.com/rodrigo-rngl/data-science-portfolio/tree/master/projects/house-sales-price-forecast) (Regressão)
 
-- **Predição de preços de casas**
+- **Previsão de preços de venda de casas**
 
 Este projeto foi desenvolvido com o objetivo de demonstrar habilidades em modelos de regressão supervisionada, aplicando técnicas avançadas para prever preços de residências no concurso Kaggle, usando dados da cidade de Ames, Iowa. O trabalho incluiu etapas de manipulação de dados, análise exploratória, seleção de features e modelagem preditiva, com foco na integridade dos dados e na prevenção de vazamento de informações. O modelo final, um XGBoost, alcançou uma performance robusta, destacando a importância de visualizações personalizadas e testes estatísticos para uma boa análise de dados, e pipelines estruturados para obter resultados precisos.
 

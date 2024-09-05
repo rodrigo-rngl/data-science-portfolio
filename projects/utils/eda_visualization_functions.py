@@ -15,12 +15,11 @@ def _n_bins(numeric_variable):
 
 
 def _comparison_test_for_ordinal_or_quantitative_vars(qualitative_var, quant_var= None, num_ordinal_var= None):
-    
     if (quant_var is not None) & (num_ordinal_var is None):
-        # Padroniza a variável contínua
+        # Padroniza a variável quantitativa
         standardized_variable = sts.zscore(quant_var)
         
-        # Verifica normalidade para a variável contínua (univariada)
+        # Verifica normalidade para a variável quantitativa (univariada)
         if len(quant_var) <= 50:
             _, p_value = sts.shapiro(standardized_variable)
         else:
@@ -28,7 +27,7 @@ def _comparison_test_for_ordinal_or_quantitative_vars(qualitative_var, quant_var
         
         is_normal = p_value > 0.05
         
-        # Se a variável contínua não for normal na análise univariada, usar testes não paramétricos
+        # Se a variável quantiativa não for normal na análise univariada, usar testes não paramétricos
         if is_normal:
             # Verifica normalidade da variável contínua por grupo da variável qualitativa (bivariada)
             group_normality_results = {}
@@ -70,18 +69,23 @@ def _comparison_test_for_ordinal_or_quantitative_vars(qualitative_var, quant_var
         return p_value, test_name
     elif (quant_var is None) & (num_ordinal_var is not None):
         if qualitative_var.nunique() == 2:
-                _, p_value = sts.mannwhitneyu(*[num_ordinal_var[qualitative_var == cat] for cat in qualitative_var.unique()])
-                test_name = 'Mann Whitney U Test'
+            _, p_value = sts.mannwhitneyu(*[num_ordinal_var[qualitative_var == cat] for cat in qualitative_var.unique()])
+            test_name = 'Mann Whitney U Test'
+        elif (qualitative_var.nunique() < 2) | (len(np.unique(num_ordinal_var)) < 2):
+            p_value = float(1)
+            test_name = None
+
+            return p_value, test_name
         else:
             _, p_value = sts.kruskal(*[num_ordinal_var[qualitative_var == cat] for cat in qualitative_var.unique()])
             test_name = 'Kruskal-Wallis Test'
         return p_value, test_name
     else:
-        raise AttributeError("Só passe apenas um atributo numérico, ou 'quant_var' ou 'num_ord_var'")
+        raise AttributeError("Só passe apenas um atributo numérico, ou 'quant_var' ou 'num_ordinal_var'")
 
 
 
-def calculate_continuous_variable_metrics(numeric_variable):
+def _calculate_continuous_variable_metrics(numeric_variable):
     """
     Calcula várias métricas descritivas para uma variável contínua.
 
@@ -163,13 +167,13 @@ def plot_continuous_variables_distributions(continuous_numeric_vars_df):
         bins = _n_bins(variable)
         
         # Calcula as métricas da variável
-        metrics_dict = calculate_continuous_variable_metrics(variable)
+        metrics_dict = _calculate_continuous_variable_metrics(variable)
 
         # Cria figura com duas área de plotagem
         fig, axes = plt.subplots(2, 1, figsize= (16, 4.5), gridspec_kw= {'height_ratios': [2.5, 1]})
 
         # Cria histograma com linhas representando as métricas
-        axes[0].hist(variable, color='#357482', edgecolor='black', bins=bins)
+        axes[0].hist(variable, color='#2d6578', edgecolor='black', bins=bins)
 
         # Cria boxplot e adiciona customizações
         axes[1].boxplot(variable, vert=False)
@@ -235,12 +239,8 @@ def plot_discrete_variables_distributions(discrete_numeric_vars_df):
         # Cria figura com uma área de plotagem
         fig, ax = plt.subplots(1, 1, figsize= (16, 4.5))
 
-        # Define a paleta de cores e a embaralha
-        palette = sns.color_palette('Spectral', n_unique_values)
-        random.shuffle(palette)
-
         # Cria do countplot
-        sns.countplot(x= variable, edgecolor= 'black', palette= palette, ax= ax)
+        sns.countplot(x= variable, edgecolor= 'black', color= '#2d6578', ax= ax)
 
         # Adiciona customizações ao gráfico
         fig.suptitle(f"Frequencies ({var_name})", fontsize= 14, fontweight= 'bold')
@@ -292,7 +292,7 @@ def plot_nominal_variables_distributions(nominal_categorical_vars_df):
         fig, ax = plt.subplots(1, 1, figsize=(16, 4.5))
 
         # Define a paleta de cores e a embaralha
-        palette = sns.color_palette('Spectral', n_unique_values)
+        palette = sns.color_palette('cubehelix', n_unique_values)
         random.shuffle(palette)
 
         # Criação do countplot
@@ -353,7 +353,7 @@ def plot_ordinal_variables_distributions(ordinal_categorical_vars_df, dict_ordin
         order = dict_ordinal_vars.get(var_name)
 
         # Cria countplot com as categorias na ordem correta
-        sns.countplot(x=variable, order=order, edgecolor='black', palette= 'viridis', ax=ax)
+        sns.countplot(x=variable, order=order, edgecolor='black', palette= 'cubehelix', ax=ax)
 
         # Adiciona customizações ao gráfico
         fig.suptitle(f"Frequencies ({var_name})", fontsize= 14, fontweight= 'bold')
@@ -399,7 +399,7 @@ def plot_bivariate_analysis_quantitative_variables(numeric_independent_vars_df, 
     """
     # Variáveis externas
     numeric_target_var_name = numeric_target_var_df.columns[0] # Nome da variável alvo
-    dict_target_metrics = calculate_continuous_variable_metrics(numeric_target_var_df[numeric_target_var_name]) # Dicionário de métricas da variável alvo
+    dict_target_metrics = _calculate_continuous_variable_metrics(numeric_target_var_df[numeric_target_var_name]) # Dicionário de métricas da variável alvo
     value_target_upper_fence = dict_target_metrics.get('upper_fence') # Valor da cerca superior da variável alvo
     
     list_numeric_independent_vars = list(numeric_independent_vars_df.columns) # Lista de variáveis independentes
@@ -408,7 +408,7 @@ def plot_bivariate_analysis_quantitative_variables(numeric_independent_vars_df, 
         # Variáveis internas
         numeric_independent_var = numeric_independent_vars_df[numeric_independent_var_name]
         n_unique_values_var = numeric_independent_var.nunique()
-        dict_independent_metrics = calculate_continuous_variable_metrics(numeric_independent_var) # Dicionário de métricas da variável independente
+        dict_independent_metrics = _calculate_continuous_variable_metrics(numeric_independent_var) # Dicionário de métricas da variável independente
         value_independent_upper_fence = dict_independent_metrics.get('upper_fence') # Valor da cerca superior da variável independente
         
         # Calcula a correlação de Spearman entre variável independedente e variável alvo
@@ -420,7 +420,7 @@ def plot_bivariate_analysis_quantitative_variables(numeric_independent_vars_df, 
         fig, axes = plt.subplots(1, 2, figsize=(16, 4.5))
 
         # Define a paleta de cores e a embaralha
-        palette = sns.color_palette('Spectral', n_unique_values_var)
+        palette = sns.color_palette('cubehelix', n_unique_values_var)
         random.shuffle(palette)
 
         # Cria primeiro gráfico
@@ -435,10 +435,13 @@ def plot_bivariate_analysis_quantitative_variables(numeric_independent_vars_df, 
                             label= f"Upper Fence ({numeric_independent_var_name}): {float(value_independent_upper_fence):.1f}")
         
         # Cria segundo gráfico
-        sns.heatmap(spearman_correlation, annot=True, cmap="icefire_r", linewidths=1, linecolor='black', vmin=-1.01, vmax=1.01, ax= axes[1])
+        icefire_r = cm.get_cmap('icefire_r', 256)
+        new_icefire_r = mcolors.LinearSegmentedColormap.from_list('icefire_r_10_90', icefire_r(np.linspace(0.10, 0.90, 256)))
+
+        sns.heatmap(spearman_correlation, annot=True, cmap= new_icefire_r, linewidths=1, linecolor='black', vmin=-1.01, vmax=1.01, ax= axes[1])
 
         # Adiciona customizações aos subplots
-        fig.suptitle(f"Correlation Plot ({numeric_independent_var_name}' x '{numeric_target_var_name})", fontsize= 14, fontweight= 'bold')
+        fig.suptitle(f"Correlation Plot ({numeric_independent_var_name} x {numeric_target_var_name})", fontsize= 14, fontweight= 'bold')
         ## Adciona linha e legenda para cerca superior da variável alvo no primeiro subplot
         axes[0].axhline(y=value_target_upper_fence, color='#483D8B', linestyle='dashed', linewidth=1, 
                     label=f"Upper Fence ({numeric_target_var_name}): {float(value_target_upper_fence):.1f}")
@@ -474,7 +477,7 @@ def plot_bivariate_analysis_quantitative_variables(numeric_independent_vars_df, 
     return None
               
 
-def plot_bivariate_analysis_continuous_target_and_qualitative_independent_vars(continuous_target_var_df, categorical_vars_df):
+def plot_bivariate_analysis_continuous_target_and_qualitative_independent_vars(continuous_target_var_df, categorical_vars_df, dict_ordinal_vars):
     """
     Plota a análise bivariada entre uma variável-alvo contínua e variáveis independentes qualitativas.
 
@@ -485,6 +488,9 @@ def plot_bivariate_analysis_continuous_target_and_qualitative_independent_vars(c
 
     categorical_vars_df : pd.DataFrame
         DataFrame contendo as variáveis qualitativas independentes.
+
+    dict_ordinal_vars : dict
+        Um dicionário onde as chaves são os nomes das variáveis ordinais e os valores são listas que definem a ordem das categorias.
 
     Retorno:
     --------
@@ -505,17 +511,25 @@ def plot_bivariate_analysis_continuous_target_and_qualitative_independent_vars(c
         # Cria igura com uma área de plotagem
         fig, ax = plt.subplots(1, 1, figsize=(16, 4.5))
 
-        palette = sns.color_palette('Spectral', n_unique_values_var)
-        random.shuffle(palette)
-        
-        # Cria boxplot
-        sns.boxplot(x= variable, y= continuous_target_var, palette= palette, ax= ax)
+        list_ordinal_vars = list(dict_ordinal_vars.keys())
+
+        if var_name in  list_ordinal_vars:
+            order = dict_ordinal_vars.get(var_name)
+
+            # Cria boxplot
+            sns.boxplot(x= variable, y= continuous_target_var, order= order, palette= 'cubehelix', ax= ax)
+        else:
+            palette = sns.color_palette('cubehelix', n_unique_values_var)
+            random.shuffle(palette)
+            
+            # Cria boxplot
+            sns.boxplot(x= variable, y= continuous_target_var, palette= palette, ax= ax)
         
         # Adiciona customizações ao gráfico
         ## Adiciona título a figura
         fig.suptitle(f"Distributions ({var_name} x {continuous_target_var_name})", fontsize= 14, fontweight= 'bold')
         ## Adiciona o valor p do teste de Kruskal-Wallis ao gráfico
-        ax.text(0.99, 0.95, f"{test_name} (p-value): {p_value:.3f}", fontsize= 12, horizontalalignment='right',
+        ax.text(0.99, 0.95, f"{test_name} (p-value): {p_value}", fontsize= 12, horizontalalignment='right',
                 verticalalignment= 'top', bbox= dict(facecolor='white', alpha=0.5), transform= ax.transAxes)
         ## Adiciona e customiza grades ao gráfico
         ax.grid(color="gray", linestyle="dotted", linewidth=0.5, axis= 'y')
@@ -529,7 +543,10 @@ def plot_bivariate_analysis_continuous_target_and_qualitative_independent_vars(c
         ax.set_xlabel(var_name)
         ax.xaxis.label.set_fontstyle('italic') # Define a label do eixo x como itálico
         ax.xaxis.label.set_size(10)
-        ax.tick_params(axis='x', labelsize= 9, labelrotation= 0)
+        if n_unique_values_var > 12:
+            ax.tick_params(axis='x', labelsize= 9, labelrotation= 50)
+        else:
+            ax.tick_params(axis='x', labelsize= 9, labelrotation= 0)
 
         # Exibe o gráfico
         plt.show()
@@ -554,8 +571,8 @@ def plot_bivariate_analysis_qualitative_target_and_nominal_independent_vars(qual
     None
         A função não retorna nenhum valor. Ela exibe os gráficos gerados.
     """
-    viridis = cm.get_cmap('viridis', 256)
-    new_viridis = mcolors.LinearSegmentedColormap.from_list('viridis_15_80', viridis(np.linspace(0.25, 0.75, 256)))
+    spectral = cm.get_cmap('Spectral', 256)
+    new_spectral = mcolors.LinearSegmentedColormap.from_list('viridis_0_100', spectral(np.linspace(0.0, 1, 256)))
 
     # Nome da variável-alvo
     qualitative_target_var_name = qualitative_target_var_df.columns[0]
@@ -573,10 +590,10 @@ def plot_bivariate_analysis_qualitative_target_and_nominal_independent_vars(qual
         fig, axes = plt.subplots(1, 2, figsize= (16, 4.5))
 
         # Gráfico de barras múltiplas agrupadas (frequência absoluta)
-        contingency_table.plot(kind= 'bar', stacked= False, ax= axes[0], colormap= new_viridis, edgecolor='black')
+        contingency_table.plot(kind= 'bar', stacked= False, ax= axes[0], colormap= new_spectral, edgecolor='black')
        
         # Gráfico de barras empilhadas (frequência relativa percentual)
-        contingency_table.div(contingency_table.sum(1), axis= 0).plot(kind= 'bar', stacked= True, ax= axes[1], colormap= new_viridis, edgecolor='black')
+        contingency_table.div(contingency_table.sum(1), axis= 0).plot(kind= 'bar', stacked= True, ax= axes[1], colormap= new_spectral, edgecolor='black')
         
         # Adiciona e ajusta customizações
         fig.suptitle(f"Absolute and Relative Frequencies ({var_name} x {qualitative_target_var_name})", fontsize=14, fontweight='bold')
@@ -601,7 +618,7 @@ def plot_bivariate_analysis_qualitative_target_and_nominal_independent_vars(qual
         axes[0].legend().set_visible(False)
         axes[1].legend(title='Churn', loc='upper right', bbox_to_anchor=(1.175, 1), fancybox=True, framealpha=1, shadow=True, borderpad=1)
         ## Adiciona valor p do teste qui-quadrado ao gráfico
-        plt.figtext(0.5, 0.01, f"Chi-Square Test (p-value): {p_value:.3f}", ha= "center", fontsize= 10, bbox=dict(facecolor='white', alpha=0.5))
+        plt.figtext(0.5, 0.01, f"Chi-Square Test (p-value): {p_value}", ha= "center", fontsize= 10, bbox=dict(facecolor='white', alpha=0.5))
         
         # Exibe o gráfico
         plt.show()
@@ -609,7 +626,7 @@ def plot_bivariate_analysis_qualitative_target_and_nominal_independent_vars(qual
     return None
 
 
-def plot_bivariate_analysis_qualitative_target_and_ordinal_independent_vars(qualitative_target_var_df, ordinal_vars_df, ordinal_categories_dict):
+def plot_bivariate_analysis_qualitative_target_and_ordinal_independent_vars(qualitative_target_var_df, ordinal_vars_df, ordinal_vars_dict):
     """
     Plota a análise bivariada entre uma variável-alvo qualitativa e variáveis independentes ordinais.
 
@@ -621,7 +638,7 @@ def plot_bivariate_analysis_qualitative_target_and_ordinal_independent_vars(qual
     ordinal_vars_df : pd.DataFrame
         DataFrame contendo as variáveis independentes ordinais.
 
-    ordinal_categories_dict : dict
+    ordinal_vars_dict : dict
         Dicionário com o nome das variáveis ordinais e suas categorias ordenadas em formato de lista.
 
     Retorno:
@@ -640,7 +657,7 @@ def plot_bivariate_analysis_qualitative_target_and_ordinal_independent_vars(qual
         ordinal_var = ordinal_vars_df[var_name]
 
         # Cria a categoria ordenada da variável ordinal
-        ordinal_var_test = pd.Categorical(ordinal_var, categories= ordinal_categories_dict[var_name], ordered= True).codes
+        ordinal_var_test = pd.Categorical(ordinal_var, categories= ordinal_vars_dict[var_name], ordered= True).codes
         
         #Realiza o teste de comparação adequado
         p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(qualitative_target_var, num_ordinal_var= ordinal_var_test)
@@ -659,7 +676,7 @@ def plot_bivariate_analysis_qualitative_target_and_ordinal_independent_vars(qual
         
         # Adciona e ajusta customizações nos gráficos
         fig.suptitle(f"Absolute and Relative Frequencies ({var_name} x {qualitative_target_var_name})", fontsize=14, fontweight='bold')
-        plt.figtext(0.5, 0.01, f"{test_name} (p_value): {p_value:.3f}", ha= "center", fontsize= 10, bbox=dict(facecolor='white', alpha=0.5))
+        plt.figtext(0.5, 0.01, f"{test_name} (p_value): {p_value}", ha= "center", fontsize= 10, bbox=dict(facecolor='white', alpha=0.5))
         ## Customiza labels e nome dos grupos nos eixos horizontais dos gráficos
         axes[0].tick_params(axis='x', labelsize= 9, labelrotation=0)  # Ajusta o tamanho da fonte e rotação dos nomes dos grupos
         axes[1].tick_params(axis='x', labelsize= 9, labelrotation=0)
@@ -703,8 +720,8 @@ def plot_bivariate_analysis_qualitative_target_and_discrete_independent_vars(qua
     None
         A função não retorna nenhum valor. Ela exibe os gráficos gerados.
     """
-    viridis = cm.get_cmap('viridis', 256)
-    new_viridis = mcolors.LinearSegmentedColormap.from_list('viridis_15_80', viridis(np.linspace(0.25, 0.75, 256)))
+    spectral = cm.get_cmap('Spectral', 256)
+    new_spectral = mcolors.LinearSegmentedColormap.from_list('spectral_25_75', spectral(np.linspace(0.25, 0.75, 256)))
 
     # Nome da variável-alvo
     qualitative_target_var_name = qualitative_target_var_df.columns[0]
@@ -718,11 +735,11 @@ def plot_bivariate_analysis_qualitative_target_and_discrete_independent_vars(qua
         if discrete_var.nunique() > 12:
             # Criação dos boxplots
             fig, ax = plt.subplots(figsize= (16, 4.5))
-            sns.boxplot(x= qualitative_target_var, y= discrete_var, palette= new_viridis, ax= ax)
+            sns.boxplot(x= qualitative_target_var, y= discrete_var, palette= new_spectral, ax= ax)
             
             # Adicionando customizações ao gráfico
             fig.suptitle(f"Distributions ({var_name} x {qualitative_target_var_name})", fontsize=14, fontweight='bold')
-            plt.text(0.5, 0.95, f"{test_name} (p-value): {p_value:.3f}", fontsize= 10, horizontalalignment='center',
+            plt.text(0.5, 0.95, f"{test_name} (p-value): {p_value}", fontsize= 10, horizontalalignment='center',
                      verticalalignment= 'center', bbox= dict(facecolor='white', alpha=0.5), transform= ax.transAxes)
             ## Customiza labels
             ax.set_xlabel(qualitative_target_var_name)
@@ -743,14 +760,14 @@ def plot_bivariate_analysis_qualitative_target_and_discrete_independent_vars(qua
             fig, axes = plt.subplots(1, 2, figsize= (16, 4.5))
             
             # Gráfico de barras múltiplas agrupadas (frequência absoluta)
-            contingency_table.plot(kind= 'bar', stacked= False, ax= axes[0], colormap= new_viridis, edgecolor='black')
+            contingency_table.plot(kind= 'bar', stacked= False, ax= axes[0], colormap= new_spectral, edgecolor='black')
             
             # Gráfico de barras empilhadas (frequência relativa percentual)
-            contingency_table.div(contingency_table.sum(1), axis= 0).plot(kind= 'bar', stacked= True, ax= axes[1], colormap= new_viridis, edgecolor='black')
+            contingency_table.div(contingency_table.sum(1), axis= 0).plot(kind= 'bar', stacked= True, ax= axes[1], colormap= new_spectral, edgecolor='black')
             
             # Adiciona e customiza os gráficos
             fig.suptitle(f"Absolute and Relative Frequencies ({var_name} x {qualitative_target_var_name})", fontsize=14, fontweight='bold')
-            plt.figtext(0.5, 0.01, f"{test_name} (p-value): {p_value:.3f}", ha= "center", fontsize= 10, bbox=dict(facecolor= 'white', alpha= 0.5))
+            plt.figtext(0.5, 0.01, f"{test_name} (p-value): {p_value}", ha= "center", fontsize= 10, bbox=dict(facecolor= 'white', alpha= 0.5))
             ## Customiza labels e nome dos grupos nos eixos horizontais dos gráficos
             axes[0].tick_params(axis='x', labelsize= 9, labelrotation=0)  # Ajusta o tamanho da fonte e rotação dos nomes dos grupos
             axes[1].tick_params(axis='x', labelsize= 9, labelrotation=0)
@@ -809,10 +826,11 @@ def plot_bivariate_analysis_qualitative_target_and_continuous_independent_vars(q
 
         # Cria boxplot
         flierprops = dict(marker= 'o', markerfacecolor='none', markersize= 6)
-        sns.boxplot(x= continuous_var, y= qualitative_target_var, palette= 'viridis', flierprops= flierprops, ax= ax)
+
+        sns.boxplot(x= continuous_var, y= qualitative_target_var, palette= 'Spectral', flierprops= flierprops, ax= ax)
 
         fig.suptitle(f"Distributions ({var_name} x {qualitative_target_var_name})", fontsize=14, fontweight='bold')
-        plt.text(0.99, 0.95, f"{test_name} (p-value): {p_value:.3f}", fontsize= 10, horizontalalignment='right',
+        plt.text(0.99, 0.95, f"{test_name} (p-value): {p_value}", fontsize= 10, horizontalalignment='right',
                     verticalalignment= 'top', bbox= dict(facecolor='white', alpha=0.5), transform= ax.transAxes)
         ## Customiza labels
         ax.set_xlabel(var_name)
@@ -830,7 +848,66 @@ def plot_bivariate_analysis_qualitative_target_and_continuous_independent_vars(q
     
     return None
 
-def plot_multivariate_heatmap_qualitative_vars():
+def plot_multivariate_heatmap_qualitative_vars(qualitative_vars_df, ordinal_vars_dict= dict()):
+    qualitative_vars_list = qualitative_vars_df.columns
+    ordinals_vars_list = list(ordinal_vars_dict.keys())
+
+    # Inicializa o DataFrame para armazenar os p-valores
+    pvalues_matrix_df = pd.DataFrame(index=qualitative_vars_list, columns=qualitative_vars_list)
+
+    for qual_var_name1 in qualitative_vars_list:
+        for qual_var_name2 in qualitative_vars_list:
+            if (qual_var_name1 in ordinals_vars_list) & (qual_var_name2 in ordinals_vars_list):
+                ordinal_var1 = qualitative_vars_df[qual_var_name1]
+                ordinal_var2 = qualitative_vars_df[qual_var_name2]
+
+                # Cria a categoria ordenada da variável ordinal
+                ordinal_var2 = pd.Categorical(ordinal_var2, categories= ordinal_vars_dict[qual_var_name2], ordered= True).codes
+                
+                #Realiza o teste de comparação adequado
+                p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(ordinal_var1, num_ordinal_var= ordinal_var2)
+            elif (qual_var_name1 in ordinals_vars_list) & (qual_var_name2 not in ordinals_vars_list):
+                ordinal_var = qualitative_vars_df[qual_var_name1]
+                nominal_var = qualitative_vars_df[qual_var_name2]
+
+                # Cria a categoria ordenada da variável ordinal
+                ordinal_var = pd.Categorical(ordinal_var, categories= ordinal_vars_dict[qual_var_name1], ordered= True).codes
+                
+                #Realiza o teste de comparação adequado
+                p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(nominal_var, num_ordinal_var= ordinal_var)
+            elif (qual_var_name1 not in ordinals_vars_list) & (qual_var_name2 in ordinals_vars_list):
+                ordinal_var = qualitative_vars_df[qual_var_name2]
+                nominal_var = qualitative_vars_df[qual_var_name1]
+
+                # Cria a categoria ordenada da variável ordinal
+                ordinal_var = pd.Categorical(ordinal_var, categories= ordinal_vars_dict[qual_var_name2], ordered= True).codes
+                
+                #Realiza o teste de comparação adequado
+                p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(nominal_var, num_ordinal_var= ordinal_var)
+            else:
+                # Criação da tabela de contingência
+                contingency_table = pd.crosstab(qualitative_vars_df[qual_var_name1], qualitative_vars_df[qual_var_name2])
+
+                # Realiza o teste qui-quadrado
+                _, p_value, _, _ = sts.chi2_contingency(contingency_table)
+
+            # Armazena o p-valor na matriz
+            pvalues_matrix_df.loc[qual_var_name1, qual_var_name2] = p_value
+
+    # Converte todos os valores para float
+    pvalues_matrix_df = pvalues_matrix_df.astype(float)
+
+    # Cria figura com uma área de plotagem
+    fig, ax = plt.subplots(1, 1, figsize=(20, 10))
+
+    icefire = cm.get_cmap('icefire', 256)
+    new_icefire = mcolors.LinearSegmentedColormap.from_list('icefire_50_80', icefire(np.linspace(0.5, 0.8, 256)))
+
+    # Cria heatmap da matrix
+    sns.heatmap(pvalues_matrix_df, annot=True, fmt=".2f", cmap= new_icefire, annot_kws={"size": 6}, ax= ax);
+
+    # Exibe o gráfico
+    plt.show()
 
     return None
 
@@ -852,9 +929,16 @@ def plot_multivariate_heatmap_quantitative_vars(quantitative_vars_df):
     correlations = quantitative_vars_df.corr(method= 'spearman')
 
     plt.figure(figsize= (20, 10))
-    sns.heatmap(correlations, cmap= "icefire_r", vmin=-1.01, vmax=1.01, annot=True, fmt=".2f", annot_kws={"size": 8});
+
+    icefire_r = cm.get_cmap('icefire_r', 256)
+    new_icefire_r = mcolors.LinearSegmentedColormap.from_list('icefire_r_10_90', icefire_r(np.linspace(0.10, 0.90, 256)))
     
+    sns.heatmap(correlations, cmap= new_icefire_r, vmin=-1.01, vmax=1.01, annot=True, fmt=".2f", annot_kws={"size": 8});
+    
+    plt.show()
+
     return None
+
 
 def plot_multivariate_heatmap_quantitative_qualitative_vars(quantitative_vars_df, qualitative_vars_df):
     """
@@ -885,7 +969,9 @@ def plot_multivariate_heatmap_quantitative_qualitative_vars(quantitative_vars_df
     for quant_var_name in quantitative_vars_list:
         for qual_var_name in qualitative_vars_list:
             # Verifica se a variável qualitativa é binária
-            if qualitative_vars_df[qual_var_name].nunique() == 2:
+            if qualitative_vars_df[qual_var_name].nunique() == 1:
+                p_value = float(1)
+            elif qualitative_vars_df[qual_var_name].nunique() == 2:
                 groups = qualitative_vars_df[qual_var_name].unique()
                 list_vars = [quantitative_vars_df[quant_var_name][qualitative_vars_df[qual_var_name] == group].tolist() for group in groups]
                 p_value = sts.mannwhitneyu(*list_vars).pvalue
@@ -903,8 +989,11 @@ def plot_multivariate_heatmap_quantitative_qualitative_vars(quantitative_vars_df
     # Cria figura com uma área de plotagem
     fig, ax = plt.subplots(1, 1, figsize=(20, 10))
 
+    icefire = cm.get_cmap('icefire', 256)
+    new_icefire = mcolors.LinearSegmentedColormap.from_list('icefire_50_80', icefire(np.linspace(0.5, 0.8, 256)))
+
     # Cria heatmap da matrix
-    sns.heatmap(pvalues_matrix_df, annot=True, fmt=".2f", cmap="viridis", annot_kws={"size": 6}, ax= ax);
+    sns.heatmap(pvalues_matrix_df, annot=True, fmt=".2f", cmap= new_icefire, annot_kws={"size": 6}, ax= ax);
 
     # Exibe o gráfico
     plt.show()
