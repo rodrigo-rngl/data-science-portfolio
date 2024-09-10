@@ -6,7 +6,7 @@
 
 > **Status**: *Em progresso* ⚠️
 
-<h2 align= "center"><p><a href= "https://github.com/rodrigo-rngl/data-science-portfolio/blob/master/projects/house-sales-price-forecast/notebooks/House%20Sales%20Price%20Forecast%20(pt-br).ipynb"><u>Clique aqui para visualizar o projeto!</u></a></p></h2> 
+<h2 align= "center"><p><a href= "https://nbviewer.org/github/rodrigo-rngl/data-science-portfolio/blob/master/projects/house-sales-price-forecast/notebooks/House%20Sales%20Price%20Forecast%20%28pt-br%29.ipynb"><u>Clique aqui para visualizar o projeto!</u></a></p></h2> 
 
 <div style= "margin: 40px;"></div>
 
