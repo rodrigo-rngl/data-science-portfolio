@@ -31,7 +31,7 @@ Como Cientista de Dados, você precisa:
 <hr> 
 <div style= "margin: 20px;"></div>
 
-# 2 - Problemas/Suposições de Negócio
+# Problemas/Suposições de Negócio
 
 Através da descrição dos dados, pude perceber que não existe variável temporal identificando o momento da extração dos dados. Com isso, nasce alguns questionamentos:
 
@@ -46,7 +46,7 @@ Através da descrição dos dados, pude perceber que não existe variável tempo
 Pra esse projeto, irei modelar sem a resposta dessas questões, embora, ter o contexto melhora o entendimento do problema e possivelmente melhores resultados na modelagem dos dados.
 
 
-# 3 - Estágios da Solução
+# Estágios da Solução
 
 Meus passos estratégicos para desenvolver a solução do Problema.
 
