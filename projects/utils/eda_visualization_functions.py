@@ -14,8 +14,57 @@ def _n_bins(numeric_variable):
     return k
 
 
-def _comparison_test_for_ordinal_or_quantitative_vars(qualitative_var, quant_var= None, num_ordinal_var= None):
-    if (quant_var is not None) & (num_ordinal_var is None):
+def _comparison_test_for_ordinal_or_quantitative_vars(qualitative_var, quant_var= None, numeric_ordinal_var= None):
+    """
+    Realiza testes estatísticos de comparação entre variáveis qualitativas e quantitativas ou ordinais, 
+    com base na normalidade dos dados e na natureza das variáveis. 
+
+    Dependendo dos tipos de variáveis passadas, a função seleciona e aplica o teste estatístico adequado, 
+    incluindo T-Test, ANOVA, Mann-Whitney U, ou Kruskal-Wallis.
+
+    Parâmetros:
+    ----------
+    qualitative_var : pandas.Series
+        Variável qualitativa (categórica) usada para agrupar a variável quantitativa ou ordinal. Deve conter pelo menos 
+        duas categorias para a comparação.
+    
+    quant_var : pandas.Series, opcional
+        Variável quantitativa contínua. Se fornecida, a função realiza um teste paramétrico ou não-paramétrico, 
+        dependendo da normalidade dos dados.
+    
+    numeric_ordinal_var : pandas.Series, opcional
+        Variável numérica ordinal. Se fornecida, a função realiza um teste não-paramétrico adequado para dados ordinais.
+
+    Retorno:
+    --------
+    p_value : float
+        O valor p do teste estatístico aplicado.
+    
+    test_name : str
+        O nome do teste estatístico aplicado. Pode ser 'T-Test', 'ANOVA Test', 'Mann Whitney U Test' ou 'Kruskal-Wallis Test'.
+
+    Erros:
+    -------
+    AttributeError
+        É levantado se não for passada uma variável numérica (quantitativa ou ordinal) ou se ambas forem fornecidas 
+        simultaneamente.
+
+    Notas:
+    ------
+    - A função assume que se a variável quantitativa não for normal na análise univariada, serão usados testes não-paramétricos.
+    - Para a análise bivariada (variável qualitativa vs. quantitativa), a normalidade de cada grupo é verificada separadamente.
+    - Se todos os grupos forem normais, são aplicados testes paramétricos (T-Test ou ANOVA). Caso contrário, são usados 
+      testes não-paramétricos (Mann-Whitney U ou Kruskal-Wallis).
+    - Quando uma variável ordinal é fornecida, a função sempre aplica testes não-paramétricos, como Mann-Whitney U ou 
+      Kruskal-Wallis.
+
+    Exemplos de uso:
+    ----------------
+    >>> p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(qualitative_var, quant_var=quant_var)
+    >>> p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(qualitative_var, numeric_ordinal_var=numeric_ordinal_var)
+    """
+
+    if (quant_var is not None) & (numeric_ordinal_var is None):
         # Padroniza a variável quantitativa
         standardized_variable = sts.zscore(quant_var)
         
@@ -67,21 +116,21 @@ def _comparison_test_for_ordinal_or_quantitative_vars(qualitative_var, quant_var
                 test_name = 'Kruskal-Wallis Test'
 
         return p_value, test_name
-    elif (quant_var is None) & (num_ordinal_var is not None):
+    elif (quant_var is None) & (numeric_ordinal_var is not None):
         if qualitative_var.nunique() == 2:
-            _, p_value = sts.mannwhitneyu(*[num_ordinal_var[qualitative_var == cat] for cat in qualitative_var.unique()])
+            _, p_value = sts.mannwhitneyu(*[numeric_ordinal_var[qualitative_var == cat] for cat in qualitative_var.unique()])
             test_name = 'Mann Whitney U Test'
-        elif (qualitative_var.nunique() < 2) | (len(np.unique(num_ordinal_var)) < 2):
+        elif (qualitative_var.nunique() < 2) | (len(np.unique(numeric_ordinal_var)) < 2):
             p_value = float(1)
             test_name = None
 
             return p_value, test_name
         else:
-            _, p_value = sts.kruskal(*[num_ordinal_var[qualitative_var == cat] for cat in qualitative_var.unique()])
+            _, p_value = sts.kruskal(*[numeric_ordinal_var[qualitative_var == cat] for cat in qualitative_var.unique()])
             test_name = 'Kruskal-Wallis Test'
         return p_value, test_name
     else:
-        raise AttributeError("Só passe apenas um atributo numérico, ou 'quant_var' ou 'num_ordinal_var'")
+        raise AttributeError("Passe pelo menos e apenas uma variavel numérica, ou 'quant_var' ou 'numeric_ordinal_var'")
 
 
 
@@ -173,10 +222,10 @@ def plot_continuous_variables_distributions(continuous_numeric_vars_df):
         fig, axes = plt.subplots(2, 1, figsize= (16, 4.5), gridspec_kw= {'height_ratios': [2.5, 1]})
 
         # Cria histograma com linhas representando as métricas
-        axes[0].hist(variable, color='#2d6578', edgecolor='black', bins=bins)
+        axes[0].hist(variable, color= '#34673e', edgecolor= 'black', bins= bins)
 
         # Cria boxplot e adiciona customizações
-        axes[1].boxplot(variable, vert=False)
+        axes[1].boxplot(variable, vert= False)
 
         # Adiciona customizações aos gáficos
         ## Adiciona título a figura
@@ -189,10 +238,8 @@ def plot_continuous_variables_distributions(continuous_numeric_vars_df):
         axes[0].axvline(x=metrics_dict['mode'], color='yellow', linestyle='dashed', linewidth=2, label=f"Mode: {metrics_dict['mode']:.1f}")
         axes[0].axvline(x=metrics_dict['upper_fence'], color='gray', linestyle='dashed', linewidth=2, label=f"Upper Fence: {metrics_dict['upper_fence']:.1f}")
         axes[0].axvline(x=metrics_dict['maximum'], color='black', linestyle='dashed', linewidth=2, label=f"Maximum: {metrics_dict['maximum']:.1f}")
-        
-        # Adiciona legendas ao histograma
+        ## Adiciona legendas ao histograma
         axes[0].legend(loc='upper right', fontsize= 'x-small', fancybox= True, framealpha= 0.9, shadow= True, borderpad= 1)
-        #bbox_to_anchor=(0.99, 1, 0.5, 0.5)
         ## Adiciona e customiza grades
         axes[0].grid(color= "gray", linestyle= "dotted", linewidth= 0.5)
         axes[1].grid(color= "gray", linestyle= "dotted", linewidth= 0.5, axis= 'x')
@@ -240,7 +287,7 @@ def plot_discrete_variables_distributions(discrete_numeric_vars_df):
         fig, ax = plt.subplots(1, 1, figsize= (16, 4.5))
 
         # Cria do countplot
-        sns.countplot(x= variable, edgecolor= 'black', color= '#2d6578', ax= ax)
+        sns.countplot(x= variable, edgecolor= 'black', color= '#34673e', ax= ax)
 
         # Adiciona customizações ao gráfico
         fig.suptitle(f"Frequencies ({var_name})", fontsize= 14, fontweight= 'bold')
@@ -285,18 +332,17 @@ def plot_nominal_variables_distributions(nominal_categorical_vars_df):
     list_nominal_vars = list(nominal_categorical_vars_df.columns)
     
     for var_name in list_nominal_vars:
-        variable = nominal_categorical_vars_df[var_name]
-        n_unique_values = variable.nunique()
+        n_unique_values = nominal_categorical_vars_df[var_name].nunique()
 
         # Cria figura com uma área de plotagem
         fig, ax = plt.subplots(1, 1, figsize=(16, 4.5))
 
-        # Define a paleta de cores e a embaralha
+        # Define a paleta de cores e a embaralhas
         palette = sns.color_palette('cubehelix', n_unique_values)
         random.shuffle(palette)
 
         # Criação do countplot
-        sns.countplot(x=variable, edgecolor='black', palette= palette, ax=ax)
+        sns.countplot(data= nominal_categorical_vars_df, x= var_name, edgecolor='black', hue= var_name, palette= palette, legend= False, ax=ax)
         
         # Adiciona customizações ao gráfico
         fig.suptitle(f"Frequencies ({var_name})", fontsize= 14, fontweight= 'bold')
@@ -314,7 +360,7 @@ def plot_nominal_variables_distributions(nominal_categorical_vars_df):
         ax.xaxis.label.set_size(10)
         ax.tick_params(axis='x', labelsize= 9, labelrotation= 0)
 
-        if len(variable.unique()) > 12:
+        if len(nominal_categorical_vars_df[var_name].unique()) > 12:
             ax.tick_params(axis='x', labelsize= 9, labelrotation= 50)
         
         # Exibe o gráfico
@@ -344,8 +390,6 @@ def plot_ordinal_variables_distributions(ordinal_categorical_vars_df, dict_ordin
     list_ordinal_vars = list(dict_ordinal_vars.keys())
     
     for var_name in list_ordinal_vars:
-        variable = ordinal_categorical_vars_df[var_name]
-
         # Cria figura com uma área de plotagem
         fig, ax = plt.subplots(1, 1, figsize=(16, 4.5))
         
@@ -353,7 +397,7 @@ def plot_ordinal_variables_distributions(ordinal_categorical_vars_df, dict_ordin
         order = dict_ordinal_vars.get(var_name)
 
         # Cria countplot com as categorias na ordem correta
-        sns.countplot(x=variable, order=order, edgecolor='black', palette= 'cubehelix', ax=ax)
+        sns.countplot(data= ordinal_categorical_vars_df, x= var_name, order= order, edgecolor='black', hue= var_name, palette= 'cubehelix', legend= False, ax=ax)
 
         # Adiciona customizações ao gráfico
         fig.suptitle(f"Frequencies ({var_name})", fontsize= 14, fontweight= 'bold')
@@ -571,8 +615,8 @@ def plot_bivariate_analysis_qualitative_target_and_nominal_independent_vars(qual
     None
         A função não retorna nenhum valor. Ela exibe os gráficos gerados.
     """
-    spectral = cm.get_cmap('Spectral', 256)
-    new_spectral = mcolors.LinearSegmentedColormap.from_list('viridis_0_100', spectral(np.linspace(0.0, 1, 256)))
+    cubehelix = cm.get_cmap('cubehelix', 256)
+    new_cubehelix = mcolors.LinearSegmentedColormap.from_list('cubehelix_30_70', cubehelix(np.linspace(0.30, 0.70, 256)))
 
     # Nome da variável-alvo
     qualitative_target_var_name = qualitative_target_var_df.columns[0]
@@ -590,10 +634,10 @@ def plot_bivariate_analysis_qualitative_target_and_nominal_independent_vars(qual
         fig, axes = plt.subplots(1, 2, figsize= (16, 4.5))
 
         # Gráfico de barras múltiplas agrupadas (frequência absoluta)
-        contingency_table.plot(kind= 'bar', stacked= False, ax= axes[0], colormap= new_spectral, edgecolor='black')
+        contingency_table.plot(kind= 'bar', stacked= False, ax= axes[0], colormap= new_cubehelix, edgecolor='black')
        
         # Gráfico de barras empilhadas (frequência relativa percentual)
-        contingency_table.div(contingency_table.sum(1), axis= 0).plot(kind= 'bar', stacked= True, ax= axes[1], colormap= new_spectral, edgecolor='black')
+        contingency_table.div(contingency_table.sum(1), axis= 0).plot(kind= 'bar', stacked= True, ax= axes[1], colormap= new_cubehelix, edgecolor='black')
         
         # Adiciona e ajusta customizações
         fig.suptitle(f"Absolute and Relative Frequencies ({var_name} x {qualitative_target_var_name})", fontsize=14, fontweight='bold')
@@ -646,8 +690,8 @@ def plot_bivariate_analysis_qualitative_target_and_ordinal_independent_vars(qual
     None
         A função não retorna nenhum valor. Ela exibe os gráficos gerados.
     """
-    viridis = cm.get_cmap('viridis', 256)
-    new_viridis = mcolors.LinearSegmentedColormap.from_list('viridis_15_80', viridis(np.linspace(0.25, 0.75, 256)))
+    cubehelix = cm.get_cmap('cubehelix', 256)
+    new_cubehelix = mcolors.LinearSegmentedColormap.from_list('cubehelix_30_70', cubehelix(np.linspace(0.30, 0.70, 256)))
 
     # Nome da variável-alvo
     qualitative_target_var_name = qualitative_target_var_df.columns[0]
@@ -660,7 +704,7 @@ def plot_bivariate_analysis_qualitative_target_and_ordinal_independent_vars(qual
         ordinal_var_test = pd.Categorical(ordinal_var, categories= ordinal_vars_dict[var_name], ordered= True).codes
         
         #Realiza o teste de comparação adequado
-        p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(qualitative_target_var, num_ordinal_var= ordinal_var_test)
+        p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(qualitative_target_var, numeric_ordinal_var= ordinal_var_test)
 
         # Criação da tabela de contingência
         contingency_table = pd.crosstab(ordinal_var, qualitative_target_var)
@@ -669,10 +713,10 @@ def plot_bivariate_analysis_qualitative_target_and_ordinal_independent_vars(qual
         fig, axes = plt.subplots(1, 2, figsize=(16, 4.5))
         
         # Gráfico de barras múltiplas agrupadas (frequência absoluta)
-        contingency_table.plot(kind= 'bar', stacked= False, ax=axes[0], colormap= new_viridis, edgecolor='black')
+        contingency_table.plot(kind= 'bar', stacked= False, ax=axes[0], colormap= new_cubehelix, edgecolor='black')
         
         # Gráfico de barras empilhadas (frequência relativa percentual)
-        contingency_table.div(contingency_table.sum(1), axis= 0).plot(kind= 'bar', stacked= True, ax= axes[1], colormap= new_viridis, edgecolor='black')
+        contingency_table.div(contingency_table.sum(1), axis= 0).plot(kind= 'bar', stacked= True, ax= axes[1], colormap= new_cubehelix, edgecolor='black')
         
         # Adciona e ajusta customizações nos gráficos
         fig.suptitle(f"Absolute and Relative Frequencies ({var_name} x {qualitative_target_var_name})", fontsize=14, fontweight='bold')
@@ -720,8 +764,8 @@ def plot_bivariate_analysis_qualitative_target_and_discrete_independent_vars(qua
     None
         A função não retorna nenhum valor. Ela exibe os gráficos gerados.
     """
-    spectral = cm.get_cmap('Spectral', 256)
-    new_spectral = mcolors.LinearSegmentedColormap.from_list('spectral_25_75', spectral(np.linspace(0.25, 0.75, 256)))
+    cubehelix = cm.get_cmap('cubehelix', 256)
+    new_cubehelix = mcolors.LinearSegmentedColormap.from_list('cubehelix_30_70', cubehelix(np.linspace(0.30, 0.70, 256)))
 
     # Nome da variável-alvo
     qualitative_target_var_name = qualitative_target_var_df.columns[0]
@@ -735,7 +779,7 @@ def plot_bivariate_analysis_qualitative_target_and_discrete_independent_vars(qua
         if discrete_var.nunique() > 12:
             # Criação dos boxplots
             fig, ax = plt.subplots(figsize= (16, 4.5))
-            sns.boxplot(x= qualitative_target_var, y= discrete_var, palette= new_spectral, ax= ax)
+            sns.boxplot(x= qualitative_target_var, y= discrete_var, hue= discrete_var, palette= new_cubehelix, ax= ax)
             
             # Adicionando customizações ao gráfico
             fig.suptitle(f"Distributions ({var_name} x {qualitative_target_var_name})", fontsize=14, fontweight='bold')
@@ -760,10 +804,10 @@ def plot_bivariate_analysis_qualitative_target_and_discrete_independent_vars(qua
             fig, axes = plt.subplots(1, 2, figsize= (16, 4.5))
             
             # Gráfico de barras múltiplas agrupadas (frequência absoluta)
-            contingency_table.plot(kind= 'bar', stacked= False, ax= axes[0], colormap= new_spectral, edgecolor='black')
+            contingency_table.plot(kind= 'bar', stacked= False, ax= axes[0], colormap= new_cubehelix, edgecolor='black')
             
             # Gráfico de barras empilhadas (frequência relativa percentual)
-            contingency_table.div(contingency_table.sum(1), axis= 0).plot(kind= 'bar', stacked= True, ax= axes[1], colormap= new_spectral, edgecolor='black')
+            contingency_table.div(contingency_table.sum(1), axis= 0).plot(kind= 'bar', stacked= True, ax= axes[1], colormap= new_cubehelix, edgecolor='black')
             
             # Adiciona e customiza os gráficos
             fig.suptitle(f"Absolute and Relative Frequencies ({var_name} x {qualitative_target_var_name})", fontsize=14, fontweight='bold')
@@ -827,7 +871,7 @@ def plot_bivariate_analysis_qualitative_target_and_continuous_independent_vars(q
         # Cria boxplot
         flierprops = dict(marker= 'o', markerfacecolor='none', markersize= 6)
 
-        sns.boxplot(x= continuous_var, y= qualitative_target_var, palette= 'Spectral', flierprops= flierprops, ax= ax)
+        sns.boxplot(x= continuous_var, y= qualitative_target_var, hue= qualitative_target_var, palette= 'cubehelix', flierprops= flierprops, ax= ax)
 
         fig.suptitle(f"Distributions ({var_name} x {qualitative_target_var_name})", fontsize=14, fontweight='bold')
         plt.text(0.99, 0.95, f"{test_name} (p-value): {p_value}", fontsize= 10, horizontalalignment='right',
@@ -848,7 +892,58 @@ def plot_bivariate_analysis_qualitative_target_and_continuous_independent_vars(q
     
     return None
 
+
 def plot_multivariate_heatmap_qualitative_vars(qualitative_vars_df, ordinal_vars_dict= dict()):
+    """
+    Gera um heatmap multivariado que visualiza os p-valores das comparações entre variáveis qualitativas e ordinais, 
+    utilizando testes estatísticos apropriados para cada combinação de variáveis.
+
+    Dependendo da natureza das variáveis (qualitativas nominais ou ordinais), a função aplica o teste estatístico 
+    adequado e preenche uma matriz de p-valores, que é então exibida como um heatmap.
+
+    Parâmetros:
+    -----------
+    qualitative_vars_df : pandas.DataFrame
+        DataFrame contendo variáveis qualitativas (nominais ou ordinais) para análise. Cada coluna deve representar uma 
+        variável qualitativa e cada linha uma observação.
+
+    ordinal_vars_dict : dict, opcional
+        Dicionário contendo as variáveis ordinais e suas respectivas ordens. As chaves do dicionário são os nomes das 
+        variáveis ordinais, e os valores são listas que especificam a ordem das categorias da variável ordinal.
+
+    Retorno:
+    --------
+    None
+        A função não retorna nenhum valor, mas exibe um gráfico de heatmap com os p-valores das comparações entre as 
+        variáveis qualitativas.
+
+    Processo:
+    ---------
+    1. Para cada par de variáveis qualitativas, a função verifica se elas são variáveis ordinais ou nominais.
+    2. Se ambas as variáveis forem ordinais, ou se uma delas for ordinal e a outra nominal, a função utiliza a função 
+       `_comparison_test_for_ordinal_or_quantitative_vars` para realizar o teste adequado (como Mann-Whitney ou Kruskal-Wallis).
+    3. Se ambas as variáveis forem nominais, é realizada uma análise de contingência com o teste qui-quadrado.
+    4. Todos os p-valores resultantes dos testes são armazenados em uma matriz de p-valores.
+    5. Um heatmap é gerado a partir dessa matriz de p-valores, exibindo visualmente a significância estatística das comparações.
+
+    Notas:
+    ------
+    - O heatmap utiliza uma paleta de cores personalizada ("icefire") para representar os p-valores. Valores menores 
+      (mais significativos) são destacados em cores diferentes.
+    - As comparações entre variáveis ordinais e nominais são tratadas com testes não-paramétricos adequados.
+    - As variáveis nominais são comparadas utilizando o teste qui-quadrado de independência.
+    - A função presume que as variáveis ordinais são fornecidas com uma ordem categórica definida no dicionário `ordinal_vars_dict`.
+
+    Exemplos de uso:
+    ----------------
+    >>> qualitative_vars_df = pd.DataFrame({
+    >>>     'var1': ['A', 'B', 'A', 'C'],
+    >>>     'var2': ['X', 'Y', 'X', 'Y'],
+    >>>     'var3': ['Low', 'Medium', 'High', 'Low']
+    >>> })
+    >>> ordinal_vars_dict = {'var3': ['Low', 'Medium', 'High']}
+    >>> plot_multivariate_heatmap_qualitative_vars(qualitative_vars_df, ordinal_vars_dict)
+    """
     qualitative_vars_list = qualitative_vars_df.columns
     ordinals_vars_list = list(ordinal_vars_dict.keys())
 
@@ -865,7 +960,7 @@ def plot_multivariate_heatmap_qualitative_vars(qualitative_vars_df, ordinal_vars
                 ordinal_var2 = pd.Categorical(ordinal_var2, categories= ordinal_vars_dict[qual_var_name2], ordered= True).codes
                 
                 #Realiza o teste de comparação adequado
-                p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(ordinal_var1, num_ordinal_var= ordinal_var2)
+                p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(ordinal_var1, numeric_ordinal_var= ordinal_var2)
             elif (qual_var_name1 in ordinals_vars_list) & (qual_var_name2 not in ordinals_vars_list):
                 ordinal_var = qualitative_vars_df[qual_var_name1]
                 nominal_var = qualitative_vars_df[qual_var_name2]
@@ -874,7 +969,7 @@ def plot_multivariate_heatmap_qualitative_vars(qualitative_vars_df, ordinal_vars
                 ordinal_var = pd.Categorical(ordinal_var, categories= ordinal_vars_dict[qual_var_name1], ordered= True).codes
                 
                 #Realiza o teste de comparação adequado
-                p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(nominal_var, num_ordinal_var= ordinal_var)
+                p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(nominal_var, numeric_ordinal_var= ordinal_var)
             elif (qual_var_name1 not in ordinals_vars_list) & (qual_var_name2 in ordinals_vars_list):
                 ordinal_var = qualitative_vars_df[qual_var_name2]
                 nominal_var = qualitative_vars_df[qual_var_name1]
@@ -883,7 +978,7 @@ def plot_multivariate_heatmap_qualitative_vars(qualitative_vars_df, ordinal_vars
                 ordinal_var = pd.Categorical(ordinal_var, categories= ordinal_vars_dict[qual_var_name2], ordered= True).codes
                 
                 #Realiza o teste de comparação adequado
-                p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(nominal_var, num_ordinal_var= ordinal_var)
+                p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(nominal_var, numeric_ordinal_var= ordinal_var)
             else:
                 # Criação da tabela de contingência
                 contingency_table = pd.crosstab(qualitative_vars_df[qual_var_name1], qualitative_vars_df[qual_var_name2])
@@ -942,22 +1037,54 @@ def plot_multivariate_heatmap_quantitative_vars(quantitative_vars_df):
 
 def plot_multivariate_heatmap_quantitative_qualitative_vars(quantitative_vars_df, qualitative_vars_df):
     """
-    Calcula p-valores para testar a relação entre variáveis quantitativas e qualitativas.
+    Gera um heatmap multivariado visualizando os p-valores das comparações entre variáveis quantitativas e qualitativas, 
+    utilizando testes estatísticos adequados com base nos dados.
 
-    A função realiza o teste de Mann-Whitney para variáveis qualitativas binárias e o teste de Kruskal-Wallis para variáveis qualitativas com mais de duas categorias.
+    A função itera sobre todas as combinações de variáveis quantitativas e qualitativas, realizando testes apropriados 
+    para avaliar a relação entre essas variáveis. Os p-valores resultantes são representados em um heatmap.
 
     Parâmetros:
     -----------
-    quantitative_vars_df : pd.DataFrame
-        DataFrame contendo as variáveis quantitativas.
+    quantitative_vars_df : pandas.DataFrame
+        DataFrame contendo as variáveis quantitativas contínuas. Cada coluna representa uma variável quantitativa e 
+        cada linha representa uma observação.
 
-    qualitative_vars_df : pd.DataFrame
-        DataFrame contendo as variáveis qualitativas.
+    qualitative_vars_df : pandas.DataFrame
+        DataFrame contendo as variáveis qualitativas (categóricas). Cada coluna representa uma variável qualitativa e 
+        cada linha representa uma observação.
 
     Retorno:
     --------
-    pd.DataFrame
-        DataFrame com p-valores para cada combinação de variáveis quantitativas e qualitativas.
+    None
+        A função não retorna nenhum valor, mas exibe um gráfico de heatmap com os p-valores das comparações entre as 
+        variáveis quantitativas e qualitativas.
+
+    Processo:
+    ---------
+    1. A função percorre cada combinação de variável quantitativa e qualitativa.
+    2. Para cada combinação, utiliza a função `_comparison_test_for_ordinal_or_quantitative_vars` para realizar o teste 
+       estatístico adequado, como T-Test, ANOVA, Mann-Whitney U, ou Kruskal-Wallis, dependendo da natureza dos dados.
+    3. Os p-valores são armazenados em uma matriz com variáveis quantitativas nas linhas e variáveis qualitativas nas colunas.
+    4. Um heatmap é gerado a partir dessa matriz de p-valores, fornecendo uma visualização gráfica dos resultados dos testes.
+
+    Notas:
+    ------
+    - A função assume que as variáveis quantitativas são contínuas e que as variáveis qualitativas são categóricas.
+    - Os p-valores indicam a significância estatística das relações entre as variáveis, com valores menores indicando 
+      maior significância.
+    - O heatmap usa uma paleta de cores personalizada ("icefire") para representar os p-valores.
+
+    Exemplos de uso:
+    ----------------
+    >>> quantitative_vars_df = pd.DataFrame({
+    >>>     'var1': [10, 20, 30, 40],
+    >>>     'var2': [5, 15, 25, 35]
+    >>> })
+    >>> qualitative_vars_df = pd.DataFrame({
+    >>>     'cat1': ['A', 'B', 'A', 'B'],
+    >>>     'cat2': ['X', 'X', 'Y', 'Y']
+    >>> })
+    >>> plot_multivariate_heatmap_quantitative_qualitative_vars(quantitative_vars_df, qualitative_vars_df)
     """
     quantitative_vars_list = quantitative_vars_df.columns
     qualitative_vars_list = qualitative_vars_df.columns
@@ -967,18 +1094,12 @@ def plot_multivariate_heatmap_quantitative_qualitative_vars(quantitative_vars_df
 
     # Itera sobre cada combinação de variáveis quantitativas e qualitativas
     for quant_var_name in quantitative_vars_list:
+        quant_var = quantitative_vars_df[quant_var_name]
+
         for qual_var_name in qualitative_vars_list:
-            # Verifica se a variável qualitativa é binária
-            if qualitative_vars_df[qual_var_name].nunique() == 1:
-                p_value = float(1)
-            elif qualitative_vars_df[qual_var_name].nunique() == 2:
-                groups = qualitative_vars_df[qual_var_name].unique()
-                list_vars = [quantitative_vars_df[quant_var_name][qualitative_vars_df[qual_var_name] == group].tolist() for group in groups]
-                p_value = sts.mannwhitneyu(*list_vars).pvalue
-            else:
-                groups = qualitative_vars_df[qual_var_name].unique()
-                list_vars = [quantitative_vars_df[quant_var_name][qualitative_vars_df[qual_var_name] == group].tolist() for group in groups]
-                p_value = sts.kruskal(*list_vars).pvalue
+            qual_var = qualitative_vars_df[qual_var_name]
+
+            p_value, test_name = _comparison_test_for_ordinal_or_quantitative_vars(qual_var, quant_var= quant_var)
 
             # Armazena o p-valor na matriz
             pvalues_matrix_df.loc[quant_var_name, qual_var_name] = p_value

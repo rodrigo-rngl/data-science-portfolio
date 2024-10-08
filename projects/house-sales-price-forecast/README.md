@@ -4,13 +4,13 @@
 <a href="https://www.kaggle.com/competitions/house-prices-advanced-regression-techniques"><img src= "img/house-sales-price-forecast-cover.png" alt= "house price prediction cover"></a>
 </p>
 
-> **Status**: *Em progresso* ⚠️
+> **Status**: *Concluído* ✅
 
 <h2 align= "center"><p><a href= "https://nbviewer.org/github/rodrigo-rngl/data-science-portfolio/blob/master/projects/house-sales-price-forecast/notebooks/House%20Sales%20Price%20Forecast%20%28pt-br%29.ipynb"><u>Clique aqui para visualizar o projeto!</u></a></p></h2> 
 
 <div style= "margin: 40px;"></div>
 
-# 1 - Objetivos do Projeto
+# Objetivos do Projeto
 
 O principal objetivo deste projeto é <u>treinar e demonstrar o meu conhecimento sobre modelos supervisionados de regressão</u>. Por esse motivo, me inscrevi em um famoso concurso do Kaggle para aplicar técnicas avançadas de regressão para prever os preços de residencias através de um conjunto de dados da cidade de Ames, Iowa (EUA).
 
@@ -18,7 +18,7 @@ Para avaliação da solução do problema proposto, o concurso exigiu que seja s
 
 <div style= "margin: 20px;"></div>
 
-# 2 - Etapas do Desenvolvimento do Modelo
+# Etapas do Desenvolvimento do Modelo
 
 Meus passos estratégicos para desenvolver o modelo:
 
@@ -28,21 +28,21 @@ Meus passos estratégicos para desenvolver o modelo:
 
 3) **Seleção de Features**: Aqui, identifiquei as variáveis mais relevantes para o modelo através do algoritmo SelectKBest pelo método de Informação Mútua.
 
-4) **Modelagem Preditiva**: Criei, otimizei e avaliei 4 tipos de modelos de Machine Learning. Por fim, escolhi como modelo final o XGBoost que me forneceu um valor de RMSLE de 0.142 +/- 0.020 na validação cruzada. Também na modelagem, criei pipelines de transformações para que as etapas de otimização e validação não sofressem vazamento de dados.
+4) **Modelagem Preditiva**: Criei, otimizei e avaliei 4 tipos de modelos de Machine Learning. Por fim, escolhi como modelo final o XGBoost que me forneceu um valor de RMSLE de 0.138 +/- 0.020 na validação cruzada. Também na modelagem, criei pipelines de transformações para que as etapas de otimização e validação não sofressem vazamento de dados.
 
  
 <div style= "margin: 20px;"></div>
 
-# 3 - Performance do Modelo
-Na submissão, o *RMSLE* atingiu o valor de **0.15681**, aproximando muito do desempenho esperado e apresentado pelos modelos desenvolvidos neste projeto, principalmente o modelo final.
+# Performance do Modelo
+Na submissão, o *RMSLE* atingiu o valor de **0.14846**, aproximando muito do desempenho esperado e apresentado pelos modelos desenvolvidos neste projeto, principalmente o modelo final.
 
 <p align= "center">
-<a><img src= "img/performance-modelo.png" alt= "performance do modelo"></a>
+<a><img src= "img/rodrigo_rangel_submission.png" alt= "performance do modelo"></a>
 </p>
 
 <div style= "margin: 20px;"></div>
 
-# 4 - Lições Aprendidas
+# Lições Aprendidas
 
 - **Visualizações personalizadas não são apenas estéticas, mas essenciais para insights profundos**. Personalizar gráficos durante a análise exploratória pode revelar padrões que passam despercebidos em abordagens padrão.
 
@@ -52,7 +52,7 @@ Na submissão, o *RMSLE* atingiu o valor de **0.15681**, aproximando muito do de
 
 <div style= "margin: 20px;"></div>
 
-# 5 - Referências
+#  Referências
 
 GÉRON, Aurélion. **Mãos à Obra: Aprendizado de Máquina com Scikit-Learn, Keras & TensorFlow: Conceitos, Ferramentas e Técnicas Para a Construção de Sistemas Inteligentes**. Alta Books, 2021
 
@@ -61,5 +61,5 @@ BROWNLEE, Jason. **Scikit-Optimize for Hyperparameter Tuning in Machine Learning
 <hr></hr>
 <div style= "margin: 20px;"></div>
 
-<p align= "center">Para acessar as versões do projeto, acesse a pasta <a href= "https://github.com/rodrigo-rngl/data-science-portfolio/tree/master/projects/house-prices-prediction/notebooks">notebooks</a>.</p>
+<p align= "center">Para acessar as versões do projeto, acesse a pasta <a href= "https://github.com/rodrigo-rngl/data-science-portfolio/tree/master/projects/house-sales-price-forecast/notebooks">notebooks</a>.</p>
 <p align= "center">Obrigado!</p>
