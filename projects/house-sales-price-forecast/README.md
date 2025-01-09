@@ -12,9 +12,11 @@
 
 # Objetivos do Projeto
 
-O principal objetivo deste projeto é <u>treinar e demonstrar o meu conhecimento sobre modelos supervisionados de regressão</u>. Por esse motivo, me inscrevi em um famoso concurso do Kaggle para aplicar técnicas avançadas de regressão para prever os preços de residencias através de um conjunto de dados da cidade de Ames, Iowa (EUA).
+O principal objetivo deste projeto é <u>treinar e demonstrar o meu conhecimento sobre modelos supervisionados de regressão</u>. Por esse motivo, me inscrevi em um famoso concurso do Kaggle para aplicar técnicas avançadas de regressão para prever os preços de residenciais através de um conjunto de dados da cidade de Ames, Iowa (EUA).
 
-Para avaliação da solução do problema proposto, o concurso exigiu que seja submetido um dataframe com os valores dos preços dos imóveis preditos pelos dados de teste, que foram avaliados em *Root-Mean-Squared-Log-Error (RMSLE)*. 
+Para avaliação da solução do problema proposto, o concurso exigiu que seja submetido um dataframe com os valores dos preços dos imóveis preditos pelos dados de teste, que foram avaliados em *Root-Mean-Squared-Log-Error (RMSLE)*.
+
+Após o treinamento e escolha do modelo, contruí uma **API Flask** para disponibilizar o resultado da previsão.
 
 <div style= "margin: 20px;"></div>
 
@@ -41,6 +43,73 @@ Na submissão, o *RMSLE* atingiu o valor de **0.14846**, aproximando muito do de
 </p>
 
 <div style= "margin: 20px;"></div>
+
+# Instruções para executar a API Flask e testar localmente
+## 1. Clonar o repositório
+Abra o terminal e execute o seguinte comando para clonar o repositório do GitHub:
+
+```bash
+git clone https://github.com/seu-usuario/seu-repositorio.git
+```
+Substitua `https://github.com/seu-usuario/seu-repositorio.git` pelo URL real do seu repositório.
+
+Após clonar o repositório, navegue até o diretório do projeto:
+
+```bash
+cd seu-repositorio
+```
+
+## 2. Instalar as dependências
+Instale as bibliotecas necessárias executando o comando:
+
+```bash
+pip install -r requirements.txt
+```
+
+## 3. Executar o servidor Flask
+Execute o servidor Flask localmente:
+
+```bash
+python flask-api/app.py
+```
+Se o projeto está configurado corretamente, o servidor Flask será iniciado, e você verá uma mensagem indicando que ele está rodando em `http://127.0.0.1:5000`.
+
+## 4. Testar a API
+Para testar o funcionamento da API, utilize o script `tester.py`. Certifique-se de que o servidor está rodando antes de executar o teste.
+
+No terminal, execute o seguinte comando:
+
+```bash
+python flask-api/tester.py
+```
+O script enviará uma solicitação para o endpoint `/predict` e exibirá a resposta no terminal.
+
+# Estrutura de Pastas do Projeto
+
+O projeto segue a seguinte estrutura:
+```
+house-sales-price-forecast/
+├── data/
+│   ├── extracted_data/                     # Dados extraídos
+│   ├── house-prices-advanced-regression-techniques.csv
+│   └── rodrigo_rangel_submission.csv       # Dados da previsão do modelo criado para submissão do desafio do Kaggle
+├── flask-api/
+│   ├── data/
+│   │   └── xgboost_model.pkl               # Serialização do modelo treinado no projeto
+│   ├── models/
+│   │   └── model_handler.py                # Manipulação do modelo
+│   ├── app.py                              # Script principal da API Flask
+│   ├── config.py                           # Configuração da API Flask
+│   └── tester.py                           # Script para testar a API localmente
+├── img/                                    # Imagens do projeto
+├── notebooks/
+│   └── House Sales Price Forecast (pt-br).ipynb   # Notebook principal do projeto (análises e modelagem)
+├── .env                                    # Variáveis de ambiente
+├── .python-version                         # Versão Python configurada
+├── README.md                               # Documentação do projeto
+├── requirements.txt                        # Arquivo de dependências
+
+```
 
 # Lições Aprendidas
 
